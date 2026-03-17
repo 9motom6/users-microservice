@@ -14,8 +14,6 @@ engine = create_engine(
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base.metadata.create_all(bind=engine)
-
 
 def override_get_db():
     try:
@@ -33,6 +31,12 @@ def test_db():
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
+
+
+@pytest.fixture(autouse=True)
+def reset_app_lifespan():
+    """Reset app state between tests."""
+    yield
 
 
 client = TestClient(app)
@@ -53,7 +57,7 @@ def test_create_user(test_db):
     data = response.json()
     assert data["email"] == "testuser@example.com"
     assert data["name"] == "testuser"
-    assert "id" in data
+    assert data["external_id"] == external_id
 
 
 def test_create_user_duplicate_email(test_db):
@@ -91,16 +95,15 @@ def test_read_user(test_db):
             "date_of_birth": "2021-01-01T12:00:00+00:00",
         },
     )
-    user_id = response.json()["id"]
-    response = client.get(f"/users/{user_id}")
+    response = client.get(f"/users/{external_id}")
     assert response.status_code == 200
     data = response.json()
     assert data["email"] == "testuser@example.com"
     assert data["name"] == "testuser"
-    assert data["id"] == user_id
+    assert data["external_id"] == external_id
 
 
 def test_read_non_existent_user(test_db):
-    response = client.get("/users/999")
+    response = client.get("/users/550e8400-e29b-41d4-a716-446655440000")
     assert response.status_code == 404
     assert response.json() == {"detail": "User not found"}

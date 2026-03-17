@@ -1,12 +1,20 @@
+from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 
-from . import crud, models, schemas
-from .database import SessionLocal, engine
+from app import crud, models, schemas
+from app.database import SessionLocal, engine
 
-models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: create tables
+    models.Base.metadata.create_all(bind=engine)
+    yield
+    # Shutdown: cleanup if needed
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 # Dependency
@@ -19,16 +27,16 @@ def get_db():
 
 
 @app.post("/save", response_model=schemas.User)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+def create_user(user: schemas.User, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     return crud.create_user(db=db, user=user)
 
 
-@app.get("/users/{id}", response_model=schemas.User)
-def read_user(id: int, db: Session = Depends(get_db)):
-    db_user = crud.get_user(db, user_id=id)
+@app.get("/users/{external_id}", response_model=schemas.User)
+def read_user(external_id: str, db: Session = Depends(get_db)):
+    db_user = crud.get_user(db, user_id=external_id)
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
