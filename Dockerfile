@@ -1,21 +1,23 @@
-# Use an official Python runtime as a parent image
-FROM python:3.11-slim
+FROM python:3.14-slim
 
-# Set the working directory in the container
-WORKDIR /code
+WORKDIR /app
 
-# Copy the dependency files
-COPY pyproject.toml uv.lock /code/
-
-# Install uv and dependencies
+# Install uv
 RUN pip install uv
-RUN uv pip install --system --no-cache --frozen-lockfile
 
-# Copy the application code
-COPY ./app /code/app
+# Copy dependency files first (better caching)
+COPY pyproject.toml uv.lock ./
 
-# Expose the port the app runs on
+# Install dependencies
+RUN uv sync --frozen --no-dev
+
+COPY src/ ./src/
+
+ENV PYTHONPATH=/app/src
+
+# Expose port
 EXPOSE 8000
 
-# Run the application
-CMD ["uv", "run", "--host", "0.0.0.0", "fastapi", "dev", "app/main.py"]
+# Run the app
+# Note: Pointing uvicorn to users-microservice.main:app
+CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
