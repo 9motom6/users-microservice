@@ -2,7 +2,7 @@
 
 A streamlined, production-ready microservice for managing user records, built with **FastAPI**, **SQLAlchemy**, and **Pydantic v2**.
 
-The app is deployed at https://users-microservice.444424444.xyz
+The app is deployed at [https://users-microservice.444424444.xyz](https://users-microservice.444424444.xyz/docs)
 
 ---
 
