@@ -4,41 +4,27 @@ from sqlalchemy.exc import SQLAlchemyError
 from app import models, schemas
 
 
-def get_user(db: Session, user_id: str) -> models.User | None:
+def get_user(db: Session, external_id: str) -> models.User | None:
     """
     Retrieves a user from the database by their unique external ID.
 
     Args:
         db (Session): The database session.
-        user_id (str): The unique external identifier of the user to retrieve.
+        external_id (str): The unique external identifier of the user to retrieve.
 
     Returns:
         models.User | None: The user object if found, otherwise None.
     """
-    return db.query(models.User).filter(models.User.external_id == user_id).first()
+    return db.get(models.User, external_id)
 
 
-def get_user_by_email(db: Session, email: str) -> models.User | None:
-    """
-    Retrieves a user from the database by their email address.
-
-    Args:
-        db (Session): The database session.
-        email (str): The email address of the user to retrieve.
-
-    Returns:
-        models.User | None: The user object if found, otherwise None.
-    """
-    return db.query(models.User).filter(models.User.email == email).first()
-
-
-def create_user(db: Session, user: schemas.UserCreate) -> models.User:
+def create_user(db: Session, user: schemas.User) -> models.User:
     """
     Creates a new user in the database.
 
     Args:
         db (Session): The database session.
-        user (schemas.UserCreate): The user data to create.
+        user (schemas.User): The user data to create.
 
     Returns:
         models.User: The newly created user object.
