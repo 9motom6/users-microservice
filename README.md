@@ -83,7 +83,7 @@ curl -X POST "http://localhost:8000/save" \
 #### **Retrieve a User**
 `GET /{external_id}`
 ```bash
-curl -X GET "http://localhost:8000/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+curl -X GET "http://localhost:8000/users/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
 ```
 
 ---
