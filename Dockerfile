@@ -20,4 +20,4 @@ EXPOSE 8000
 
 # Run the app
 # Note: Pointing uvicorn to users-microservice.main:app
-CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "fastapi", "dev", "src/app/main.py", "--host", "0.0.0.0", "--port", "8000"]
